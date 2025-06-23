@@ -22,6 +22,20 @@ const electronHandler = {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
   },
+  // Settings management
+  settings: {
+    get: (key: string) => ipcRenderer.invoke('settings:get', key),
+    set: (key: string, value: any) =>
+      ipcRenderer.invoke('settings:set', key, value),
+    getAll: () => ipcRenderer.invoke('settings:getAll'),
+  },
+  // History/data management
+  history: {
+    get: () => ipcRenderer.invoke('history:get'),
+    add: (item: any) => ipcRenderer.invoke('history:add', item),
+    clear: () => ipcRenderer.invoke('history:clear'),
+    delete: (id: number) => ipcRenderer.invoke('history:delete', id),
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

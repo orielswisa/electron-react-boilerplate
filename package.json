@@ -1,30 +1,27 @@
 {
-  "name": "electron-react-boilerplate",
-  "description": "A foundation for scalable desktop apps",
+  "name": "polls-to-graphs",
+  "description": "Hebrew polls analysis and visualization tool with AI-powered insights",
   "keywords": [
     "electron",
-    "boilerplate",
-    "react",
-    "typescript",
-    "ts",
-    "sass",
-    "webpack",
-    "hot",
-    "reload"
+    "polls",
+    "analysis",
+    "charts",
+    "ai",
+    "hebrew",
+    "data-visualization"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/your-username/polls-to-graphs",
   "bugs": {
-    "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
+    "url": "https://github.com/your-username/polls-to-graphs/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron-react-boilerplate/electron-react-boilerplate.git"
+    "url": "git+https://github.com/your-username/polls-to-graphs.git"
   },
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
+    "name": "Your Name",
+    "email": "your.email@example.com"
   },
   "contributors": [
     {
@@ -102,12 +99,18 @@
   },
   "dependencies": {
     "@electron/notarize": "^3.0.0",
+    "chart.js": "^4.5.0",
     "electron-debug": "^4.1.0",
     "electron-log": "^5.3.2",
+    "electron-store": "^8.2.0",
     "electron-updater": "^6.3.9",
+    "file-saver": "^2.0.5",
+    "openai": "^5.7.0",
     "react": "^19.0.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.3.0"
+    "react-router-dom": "^7.3.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
@@ -175,8 +178,8 @@
     "webpack-merge": "^6.0.1"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "Polls to Graphs",
+    "appId": "com.pollstographs.app",
     "asar": true,
     "afterSign": ".erb/scripts/notarize.js",
     "asarUnpack": "**\\*.{node,dll}",
@@ -216,12 +219,22 @@
     },
     "win": {
       "target": [
-        "nsis"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "linux": {
       "target": [
-        "AppImage"
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "category": "Development"
     },

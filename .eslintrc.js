@@ -1,6 +1,7 @@
 module.exports = {
   extends: 'erb',
   plugins: ['@typescript-eslint'],
+  ignorePatterns: ['.erb/**/*'],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
@@ -13,6 +14,8 @@ module.exports = {
     '@typescript-eslint/no-shadow': 'error',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 'error',
+    'react/require-default-props': 'off', // Using TypeScript default parameters instead
+    'react/jsx-props-no-spreading': 'off', // Needed for chart components
   },
   parserOptions: {
     ecmaVersion: 2022,

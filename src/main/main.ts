@@ -10,25 +10,70 @@
  */
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
-import log from 'electron-log';
+
+import Store from 'electron-store';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
-class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
+// Initialize electron-store for settings and data persistence
+const store = new Store({
+  defaults: {
+    settings: {
+      openaiApiKey: '',
+    },
+    history: [],
+  },
+});
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+// IPC handlers for settings management
+ipcMain.handle('settings:get', (event, key: string) => {
+  return store.get(`settings.${key}`);
+});
+
+ipcMain.handle('settings:set', (event, key: string, value: any) => {
+  store.set(`settings.${key}`, value);
+  return true;
+});
+
+ipcMain.handle('settings:getAll', () => {
+  return store.get('settings');
+});
+
+// IPC handlers for history/data management
+ipcMain.handle('history:get', () => {
+  return store.get('history', []);
+});
+
+ipcMain.handle('history:add', (event, item: any) => {
+  const history = store.get('history', []) as any[];
+  const newItem = {
+    ...item,
+    id: Date.now(), // Simple ID generation
+    timestamp: new Date().toISOString(),
+  };
+  history.unshift(newItem); // Add to beginning
+
+  // Keep only last 100 items to prevent unlimited growth
+  if (history.length > 100) {
+    history.splice(100);
+  }
+
+  store.set('history', history);
+  return newItem;
+});
+
+ipcMain.handle('history:clear', () => {
+  store.set('history', []);
+  return true;
+});
+
+ipcMain.handle('history:delete', (event, id: number) => {
+  const history = store.get('history', []) as any[];
+  const filteredHistory = history.filter((item) => item.id !== id);
+  store.set('history', filteredHistory);
+  return true;
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -71,14 +116,21 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 1400,
+    height: 900,
+    minWidth: 800,
+    minHeight: 600,
+    center: true,
+    resizable: true,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
     },
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
@@ -91,6 +143,11 @@ const createWindow = async () => {
       mainWindow.minimize();
     } else {
       mainWindow.show();
+    }
+
+    // Open DevTools in development
+    if (isDebug) {
+      mainWindow.webContents.openDevTools();
     }
   });
 
@@ -106,10 +163,6 @@ const createWindow = async () => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
   });
-
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
 };
 
 /**
